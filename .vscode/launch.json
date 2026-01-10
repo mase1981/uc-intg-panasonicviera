@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Panasonic Viera Integration",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "intg_panasonicviera",
+            "justMyCode": false,
+            "env": {
+                "UC_CONFIG_HOME": "${workspaceFolder}/config",
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

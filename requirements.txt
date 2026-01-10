@@ -1,0 +1,2 @@
+ucapi-framework>=1.4.2
+panasonic-viera==0.4.4
