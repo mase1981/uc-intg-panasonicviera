@@ -8,7 +8,7 @@ Panasonic Viera TV Remote entity.
 import logging
 from typing import Any
 from ucapi import StatusCodes
-from ucapi.remote import Attributes, Commands, Features, Remote, create_send_cmd
+from ucapi.remote import Attributes, Commands, Features, Remote
 from .config import PanasonicVieraConfig
 from .device import PanasonicVieraDevice
 
@@ -91,8 +91,8 @@ class PanasonicVieraRemote(Remote):
 
         entity_id = f"remote.{device_config.identifier}"
 
-        # Create simple commands for all keys
-        simple_commands = [create_send_cmd(key) for key in VIERA_KEYS.keys()]
+        # Create simple commands for all keys (just the key names as strings)
+        simple_commands = list(VIERA_KEYS.keys())
 
         # Create UI buttons organized by category
         ui_pages = [
