@@ -49,15 +49,14 @@ jobs:
                 --collect-all zeroconf \
                 --collect-all ucapi \
                 --collect-all ucapi_framework \
-                --hidden-import uc_intg_${INTG_NAME}.driver \
-                --hidden-import uc_intg_${INTG_NAME}.device \
-                --hidden-import uc_intg_${INTG_NAME}.config \
-                --hidden-import uc_intg_${INTG_NAME}.media_player \
-                --hidden-import uc_intg_${INTG_NAME}.remote \
-                --hidden-import uc_intg_${INTG_NAME}.sensor \
-                --hidden-import uc_intg_${INTG_NAME}.setup_flow \
+                --hidden-import intg_${INTG_NAME}.driver \
+                --hidden-import intg_${INTG_NAME}.device \
+                --hidden-import intg_${INTG_NAME}.config \
+                --hidden-import intg_${INTG_NAME}.media_player \
+                --hidden-import intg_${INTG_NAME}.remote \
+                --hidden-import intg_${INTG_NAME}.setup_flow \
                 --paths . \
-                uc_intg_${INTG_NAME}/__init__.py"
+                intg_${INTG_NAME}/__init__.py"
 
       - name: Prepare artifacts
         shell: bash
@@ -110,7 +109,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository_owner }}/uc-intg-anthemav
+          images: ghcr.io/${{ github.repository_owner }}/uc-intg-panasonicviera
           tags: |
             type=ref,event=tag
             type=raw,value=latest
@@ -136,7 +135,6 @@ jobs:
         uses: actions/download-artifact@v4
 
       - name: Extract build archives from downloaded files
-        # FIXED: Added missing semicolon before 'do'
         run: |
           ls -R
           for D in *; do
@@ -147,7 +145,7 @@ jobs:
 
       - name: Create hash file
         run: |
-          for filename in *.tar.gz; do 
+          for filename in *.tar.gz; do
             echo "sha256 $(sha256sum "$filename")" >> ${{needs.build.outputs.driver_id}}.hash
           done
 
