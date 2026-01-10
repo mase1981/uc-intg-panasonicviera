@@ -1,0 +1,184 @@
+"""
+Panasonic Viera TV setup flow for Unfolded Circle integration.
+
+:copyright: (c) 2026 by Meir Miyara.
+:license: MPL-2.0, see LICENSE for more details.
+"""
+
+import asyncio
+import logging
+from typing import Any
+from panasonic_viera import RemoteControl
+from ucapi import RequestUserInput, IntegrationSetupError, SetupError
+from ucapi_framework import BaseSetupFlow
+from .config import PanasonicVieraConfig
+
+_LOG = logging.getLogger(__name__)
+
+
+class PanasonicVieraSetupFlow(BaseSetupFlow[PanasonicVieraConfig]):
+    """Setup flow for Panasonic Viera TV integration with PIN pairing support."""
+
+    def get_manual_entry_form(self) -> RequestUserInput:
+        """Define manual entry fields."""
+        return RequestUserInput(
+            {"en": "Panasonic Viera TV Setup"},
+            [
+                {
+                    "id": "name",
+                    "label": {"en": "TV Name"},
+                    "field": {"text": {"value": ""}},
+                },
+                {
+                    "id": "host",
+                    "label": {"en": "IP Address"},
+                    "field": {"text": {"value": ""}},
+                },
+                {
+                    "id": "port",
+                    "label": {"en": "Port"},
+                    "field": {"text": {"value": "55000"}},
+                },
+            ],
+        )
+
+    async def query_device(
+        self, input_values: dict[str, Any]
+    ) -> PanasonicVieraConfig | RequestUserInput:
+        """
+        Validate connection and create config.
+        Handles PIN pairing for encrypted TVs.
+        """
+        host = input_values.get("host", "").strip()
+        if not host:
+            raise ValueError("IP address is required")
+
+        port = int(input_values.get("port", 55000))
+        name = input_values.get("name", f"Panasonic Viera ({host})").strip()
+        pin = input_values.get("pin", "").strip()
+
+        _LOG.info("Setting up Panasonic Viera TV at %s:%s", host, port)
+
+        try:
+            # Create RemoteControl instance
+            remote = await asyncio.to_thread(RemoteControl, host, port)
+
+            # Check if TV requires encryption (has app_id and enc_key)
+            app_id = None
+            encryption_key = None
+
+            # Try to get volume to check if encryption is needed
+            try:
+                await asyncio.to_thread(remote.get_volume)
+                _LOG.info("TV does not require encryption")
+
+            except Exception:
+                # TV requires encryption - need PIN pairing
+                _LOG.info("TV requires encryption - initiating PIN pairing")
+
+                # If we don't have a PIN yet, request it
+                if not pin:
+                    # Request PIN from TV
+                    try:
+                        await asyncio.to_thread(remote.request_pin_code)
+                        _LOG.info("PIN request sent to TV - displaying on screen")
+
+                        # Return form to collect PIN
+                        return RequestUserInput(
+                            {"en": "Enter PIN from TV"},
+                            [
+                                {
+                                    "id": "host",
+                                    "label": {"en": "IP Address"},
+                                    "field": {"text": {"value": host}},
+                                },
+                                {
+                                    "id": "port",
+                                    "label": {"en": "Port"},
+                                    "field": {"text": {"value": str(port)}},
+                                },
+                                {
+                                    "id": "name",
+                                    "label": {"en": "TV Name"},
+                                    "field": {"text": {"value": name}},
+                                },
+                                {
+                                    "id": "pin",
+                                    "label": {
+                                        "en": "PIN Code (displayed on TV screen)"
+                                    },
+                                    "field": {"text": {"value": ""}},
+                                },
+                            ],
+                        )
+
+                    except Exception as pin_err:
+                        raise ValueError(
+                            f"Failed to request PIN from TV: {pin_err}"
+                        ) from pin_err
+
+                # We have a PIN - authorize and get credentials
+                try:
+                    _LOG.info("Authorizing with PIN: %s", pin)
+                    await asyncio.to_thread(remote.authorize_pin_code, pincode=pin)
+
+                    # Get app_id and encryption_key
+                    app_id = remote.app_id
+                    encryption_key = remote.enc_key
+
+                    if not app_id or not encryption_key:
+                        raise ValueError(
+                            "Failed to obtain app_id and encryption_key after PIN authorization"
+                        )
+
+                    _LOG.info("Successfully paired with encrypted TV")
+
+                except Exception as auth_err:
+                    raise ValueError(
+                        f"PIN authorization failed: {auth_err}. "
+                        "Please verify the PIN is correct and try again."
+                    ) from auth_err
+
+            # Create identifier
+            identifier = f"viera_{host.replace('.', '_')}_{port}"
+
+            # Test connection with credentials (if encrypted)
+            if app_id and encryption_key:
+                test_remote = await asyncio.to_thread(RemoteControl, host, port)
+                test_remote.app_id = app_id
+                test_remote.enc_key = encryption_key
+
+                # Verify credentials work
+                try:
+                    await asyncio.to_thread(test_remote.get_volume)
+                    _LOG.info("Verified encrypted connection works")
+                except Exception as test_err:
+                    raise ValueError(
+                        f"Failed to verify encrypted connection: {test_err}"
+                    ) from test_err
+
+            # Create and return config
+            config = PanasonicVieraConfig(
+                identifier=identifier,
+                name=name,
+                host=host,
+                port=port,
+                app_id=app_id,
+                encryption_key=encryption_key,
+            )
+
+            _LOG.info("Setup completed successfully for %s", name)
+            return config
+
+        except asyncio.TimeoutError:
+            raise ValueError(
+                f"Connection timeout to {host}:{port}\n"
+                "Please verify TV is powered on and accessible"
+            ) from None
+
+        except ValueError:
+            # Re-raise ValueError as-is (already has good error message)
+            raise
+
+        except Exception as err:
+            raise ValueError(f"Setup failed: {err}") from err

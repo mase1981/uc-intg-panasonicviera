@@ -1,0 +1,38 @@
+{
+  "driver_id": "panasonicviera",
+  "version": "1.0.0",
+  "min_core_api": "0.22.0",
+  "name": {
+    "en": "Panasonic Viera TV"
+  },
+  "icon": "uc:tv",
+  "description": {
+    "en": "Integration for Panasonic Viera Smart TVs with support for encrypted and unencrypted models"
+  },
+  "developer": {
+    "name": "Meir Miyara",
+    "email": "meir.miyara@gmail.com"
+  },
+  "home_page": "https://github.com/mase1981/uc-intg-panasonicviera",
+  "release_date": "2026-01-10",
+  "setup_data_schema": {
+    "title": {
+      "en": "Panasonic Viera TV Setup"
+    },
+    "settings": [
+      {
+        "id": "info",
+        "label": {
+          "en": "Setup information"
+        },
+        "field": {
+          "label": {
+            "value": {
+              "en": "Enter your Panasonic Viera TV IP address. For encrypted models, you'll need to enter a PIN displayed on your TV screen."
+            }
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+[project]
+name = "uc-intg-panasonicviera"
+dynamic = ["version"]
+description = "Panasonic Viera TV integration for Unfolded Circle Remote"
+authors = [
+    {name = "Meir Miyara", email = "meir.miyara@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MPL-2.0"}
+keywords = ["unfoldedcircle", "integration", "panasonic", "viera", "tv"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Mozilla Public License 2.0 (MPL-2.0)",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "ucapi-framework>=1.4.0",
+    "panasonic-viera==0.4.4",
+]
+
+[project.urls]
+Homepage = "https://github.com/mase1981/uc-intg-panasonicviera"
+Repository = "https://github.com/mase1981/uc-intg-panasonicviera"
+Issues = "https://github.com/mase1981/uc-intg-panasonicviera/issues"
+
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["intg_panasonicviera"]
+
+[tool.setuptools.dynamic]
+version = {attr = "intg_panasonicviera.__version__"}
