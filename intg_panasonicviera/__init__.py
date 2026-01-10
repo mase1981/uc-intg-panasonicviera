@@ -12,9 +12,9 @@ import os
 from pathlib import Path
 from ucapi import DeviceStates
 from ucapi_framework import get_config_path, BaseConfigManager
-from .driver import PanasonicVieraDriver
-from .setup_flow import PanasonicVieraSetupFlow
-from .config import PanasonicVieraConfig
+from intg_panasonicviera.driver import PanasonicVieraDriver
+from intg_panasonicviera.setup_flow import PanasonicVieraSetupFlow
+from intg_panasonicviera.config import PanasonicVieraConfig
 
 try:
     driver_path = Path(__file__).parent.parent / "driver.json"
