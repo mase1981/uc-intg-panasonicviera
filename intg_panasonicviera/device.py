@@ -11,6 +11,7 @@ from typing import Any
 from panasonic_viera import RemoteControl
 from ucapi_framework import PollingDevice, DeviceEvents
 from ucapi.media_player import Attributes as MediaAttributes
+from ucapi.remote import Attributes as RemoteAttributes
 from intg_panasonicviera.config import PanasonicVieraConfig
 
 _LOG = logging.getLogger(__name__)
@@ -166,7 +167,10 @@ class PanasonicVieraDevice(PollingDevice):
         self.events.emit(DeviceEvents.UPDATE, media_player_id, media_player_attrs)
 
         remote_id = f"remote.{self.identifier}"
-        self.events.emit(DeviceEvents.UPDATE, remote_id, {})
+        remote_attrs = {
+            RemoteAttributes.STATE: state_value,
+        }
+        self.events.emit(DeviceEvents.UPDATE, remote_id, remote_attrs)
 
     async def turn_on(self) -> bool:
         _LOG.info("[%s] Turning on", self.log_id)
