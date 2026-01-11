@@ -67,12 +67,15 @@ class PanasonicVieraSetupFlow(BaseSetupFlow[PanasonicVieraConfig]):
             app_id = None
             encryption_key = None
 
-            # Try to get volume to check if encryption is needed
+            # Try to send a key to check if encryption is needed
+            # Note: get_volume uses SOAP API which may not require encryption,
+            # but send_key uses command API which DOES require encryption on 2018+ models
             try:
-                await asyncio.to_thread(remote.get_volume)
-                _LOG.info("TV does not require encryption")
+                # Test with a harmless INFO key - won't change TV state
+                await asyncio.to_thread(remote.send_key, "NRC_INFO-ONOFF")
+                _LOG.info("TV does not require encryption - send_key works")
 
-            except Exception:
+            except Exception as test_err:
                 # TV requires encryption - need PIN pairing
                 _LOG.info("TV requires encryption - initiating PIN pairing")
 
