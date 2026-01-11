@@ -11,7 +11,7 @@ from typing import Any
 from panasonic_viera import RemoteControl
 from ucapi import RequestUserInput, IntegrationSetupError, SetupError
 from ucapi_framework import BaseSetupFlow
-from .config import PanasonicVieraConfig
+from intg_panasonicviera.config import PanasonicVieraConfig
 
 _LOG = logging.getLogger(__name__)
 
@@ -19,9 +19,9 @@ _LOG = logging.getLogger(__name__)
 class PanasonicVieraSetupFlow(BaseSetupFlow[PanasonicVieraConfig]):
     """Setup flow for Panasonic Viera TV integration with PIN pairing support."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, driver, **kwargs):
         """Initialize setup flow."""
-        super().__init__(**kwargs)
+        super().__init__(driver, **kwargs)
         self._remote_instance: RemoteControl | None = None
 
     def get_manual_entry_form(self) -> RequestUserInput:

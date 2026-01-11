@@ -10,7 +10,7 @@ import logging
 from typing import Any
 from panasonic_viera import RemoteControl
 from ucapi_framework import PollingDevice, DeviceEvents
-from .config import PanasonicVieraConfig
+from intg_panasonicviera.config import PanasonicVieraConfig
 
 _LOG = logging.getLogger(__name__)
 
