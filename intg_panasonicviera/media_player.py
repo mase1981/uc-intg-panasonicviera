@@ -58,6 +58,68 @@ class PanasonicVieraMediaPlayer(MediaPlayer):
             Attributes.SOURCE_LIST: [],
         }
 
+        user_interface = {
+            "pages": [
+                {
+                    "page_id": "controls",
+                    "name": "Controls",
+                    "grid": {"width": 4, "height": 6},
+                    "items": [
+                        {
+                            "type": "text",
+                            "text": "Power\nOn",
+                            "command": {"cmd_id": Commands.ON},
+                            "location": {"x": 0, "y": 0},
+                            "size": {"width": 2, "height": 1},
+                        },
+                        {
+                            "type": "text",
+                            "text": "Power\nOff",
+                            "command": {"cmd_id": Commands.OFF},
+                            "location": {"x": 2, "y": 0},
+                            "size": {"width": 2, "height": 1},
+                        },
+                        {
+                            "type": "icon",
+                            "icon": "uc:prev",
+                            "command": {"cmd_id": Commands.PREVIOUS},
+                            "location": {"x": 0, "y": 1},
+                        },
+                        {
+                            "type": "icon",
+                            "icon": "uc:play-pause",
+                            "command": {"cmd_id": Commands.PLAY_PAUSE},
+                            "location": {"x": 1, "y": 1},
+                        },
+                        {
+                            "type": "icon",
+                            "icon": "uc:next",
+                            "command": {"cmd_id": Commands.NEXT},
+                            "location": {"x": 2, "y": 1},
+                        },
+                        {
+                            "type": "icon",
+                            "icon": "uc:stop",
+                            "command": {"cmd_id": Commands.STOP},
+                            "location": {"x": 3, "y": 1},
+                        },
+                        {
+                            "type": "icon",
+                            "icon": "uc:backward",
+                            "command": {"cmd_id": Commands.REWIND},
+                            "location": {"x": 1, "y": 2},
+                        },
+                        {
+                            "type": "icon",
+                            "icon": "uc:forward",
+                            "command": {"cmd_id": Commands.FAST_FORWARD},
+                            "location": {"x": 2, "y": 2},
+                        },
+                    ],
+                },
+            ]
+        }
+
         options = {
             Options.SIMPLE_COMMANDS: [
                 Commands.ON,
@@ -73,7 +135,8 @@ class PanasonicVieraMediaPlayer(MediaPlayer):
                 Commands.PREVIOUS,
                 Commands.FAST_FORWARD,
                 Commands.REWIND,
-            ]
+            ],
+            "user_interface": user_interface,
         }
 
         super().__init__(

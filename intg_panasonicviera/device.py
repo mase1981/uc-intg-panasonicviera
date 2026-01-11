@@ -7,6 +7,7 @@ Panasonic Viera TV device implementation for Unfolded Circle integration.
 
 import asyncio
 import logging
+import socket
 from typing import Any
 from panasonic_viera import RemoteControl
 from ucapi_framework import PollingDevice, DeviceEvents
@@ -172,14 +173,52 @@ class PanasonicVieraDevice(PollingDevice):
         }
         self.events.emit(DeviceEvents.UPDATE, remote_id, remote_attrs)
 
+    def _send_wol_packet(self, mac_address: str) -> bool:
+        """Send Wake-on-LAN magic packet to TV."""
+        try:
+            # Parse MAC address (supports formats: AA:BB:CC:DD:EE:FF, AA-BB-CC-DD-EE-FF, AABBCCDDEEFF)
+            mac = mac_address.replace(":", "").replace("-", "").upper()
+            if len(mac) != 12:
+                _LOG.error("[%s] Invalid MAC address format: %s", self.log_id, mac_address)
+                return False
+
+            # Convert MAC to bytes
+            mac_bytes = bytes.fromhex(mac)
+
+            # Create magic packet (6 bytes of FF followed by MAC repeated 16 times)
+            magic_packet = b"\xFF" * 6 + mac_bytes * 16
+
+            # Send packet via UDP broadcast
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            sock.sendto(magic_packet, ("<broadcast>", 9))
+            sock.close()
+
+            _LOG.info("[%s] Sent WoL magic packet to %s", self.log_id, mac_address)
+            return True
+
+        except Exception as err:
+            _LOG.error("[%s] Failed to send WoL packet: %s", self.log_id, err)
+            return False
+
     async def turn_on(self) -> bool:
         _LOG.info("[%s] Turning on", self.log_id)
         try:
-            remote = await self._create_remote_control()
-            await asyncio.to_thread(remote.turn_on)
+            # If MAC address is configured, use Wake-on-LAN
+            if self._device_config.mac_address:
+                _LOG.info("[%s] Using Wake-on-LAN with MAC: %s", self.log_id, self._device_config.mac_address)
+                await asyncio.to_thread(self._send_wol_packet, self._device_config.mac_address)
+                # Give TV time to wake up (WoL takes 5-10 seconds typically)
+                await asyncio.sleep(8)
+            else:
+                # Fallback to remote.turn_on (less reliable for fully powered off TVs)
+                _LOG.info("[%s] No MAC address configured, using remote.turn_on", self.log_id)
+                remote = await self._create_remote_control()
+                await asyncio.to_thread(remote.turn_on)
+                await asyncio.sleep(2)
+
             self._power_state = True
             self._emit_update()
-            await asyncio.sleep(2)
             return True
         except Exception as err:
             _LOG.error("[%s] Turn on failed: %s", self.log_id, err)

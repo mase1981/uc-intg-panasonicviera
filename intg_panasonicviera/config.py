@@ -19,6 +19,7 @@ class PanasonicVieraConfig:
     port: int = 55000
     app_id: str | None = None
     encryption_key: str | None = None
+    mac_address: str | None = None
 
 
 class PanasonicVieraConfigManager(BaseConfigManager[PanasonicVieraConfig]):
