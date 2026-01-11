@@ -16,6 +16,7 @@ from ucapi.media_player import (
     MediaPlayer,
     States,
     MediaType,
+    Options,
 )
 from intg_panasonicviera.config import PanasonicVieraConfig
 from intg_panasonicviera.device import PanasonicVieraDevice
@@ -24,50 +25,72 @@ _LOG = logging.getLogger(__name__)
 
 
 class PanasonicVieraMediaPlayer(MediaPlayer):
-    """Media player entity for Panasonic Viera TV."""
 
     def __init__(
         self, device_config: PanasonicVieraConfig, device: PanasonicVieraDevice
     ):
-        """Initialize with device reference."""
         self._device = device
         self._device_config = device_config
 
         entity_id = f"media_player.{device_config.identifier}"
 
+        features = [
+            Features.ON_OFF,
+            Features.VOLUME,
+            Features.VOLUME_UP_DOWN,
+            Features.MUTE_TOGGLE,
+            Features.MUTE,
+            Features.UNMUTE,
+            Features.PLAY_PAUSE,
+            Features.STOP,
+            Features.NEXT,
+            Features.PREVIOUS,
+            Features.FAST_FORWARD,
+            Features.REWIND,
+            Features.SELECT_SOURCE,
+        ]
+
+        attributes = {
+            Attributes.STATE: States.UNAVAILABLE,
+            Attributes.VOLUME: 0,
+            Attributes.MUTED: False,
+            Attributes.SOURCE: "",
+            Attributes.SOURCE_LIST: [],
+        }
+
+        options = {
+            Options.SIMPLE_COMMANDS: [
+                Commands.ON,
+                Commands.OFF,
+                Commands.VOLUME_UP,
+                Commands.VOLUME_DOWN,
+                Commands.MUTE_TOGGLE,
+                Commands.MUTE,
+                Commands.UNMUTE,
+                Commands.PLAY_PAUSE,
+                Commands.STOP,
+                Commands.NEXT,
+                Commands.PREVIOUS,
+                Commands.FAST_FORWARD,
+                Commands.REWIND,
+            ]
+        }
+
         super().__init__(
             entity_id,
             device_config.name,
-            [
-                Features.ON_OFF,
-                Features.VOLUME,
-                Features.VOLUME_UP_DOWN,
-                Features.MUTE_TOGGLE,
-                Features.MUTE,
-                Features.UNMUTE,
-                Features.PLAY_PAUSE,
-                Features.STOP,
-                Features.NEXT,
-                Features.PREVIOUS,
-                Features.FAST_FORWARD,
-                Features.REWIND,
-                Features.SELECT_SOURCE,
-            ],
-            {
-                Attributes.STATE: States.UNAVAILABLE,
-                Attributes.VOLUME: 0,
-                Attributes.MUTED: False,
-                Attributes.SOURCE: "",
-                Attributes.SOURCE_LIST: [],
-            },
+            features,
+            attributes,
             device_class=DeviceClasses.TV,
             cmd_handler=self.handle_command,
+            options=options,
         )
+
+        _LOG.info("[%s] Media player entity initialized", self.id)
 
     async def handle_command(
         self, entity: MediaPlayer, cmd_id: str, params: dict[str, Any] | None
     ) -> StatusCodes:
-        """Handle commands."""
         _LOG.info("[%s] Command: %s %s", self.id, cmd_id, params or "")
 
         try:
@@ -141,7 +164,6 @@ class PanasonicVieraMediaPlayer(MediaPlayer):
                     media_type = params["media_type"]
                     media_id = params["media_id"]
 
-                    # Support URL playback
                     if media_type == MediaType.URL or media_id.startswith("http"):
                         success = await self._device.play_media(media_id)
                         return StatusCodes.OK if success else StatusCodes.SERVER_ERROR

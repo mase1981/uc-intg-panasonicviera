@@ -6,7 +6,9 @@ Panasonic Viera TV driver for Unfolded Circle Remote.
 """
 
 import logging
-from ucapi import Entity
+from typing import Any
+from ucapi import Entity, EntityTypes
+from ucapi.media_player import Attributes as MediaAttributes
 from ucapi_framework import BaseIntegrationDriver
 from intg_panasonicviera.config import PanasonicVieraConfig
 from intg_panasonicviera.device import PanasonicVieraDevice
@@ -17,10 +19,8 @@ _LOG = logging.getLogger(__name__)
 
 
 class PanasonicVieraDriver(BaseIntegrationDriver[PanasonicVieraDevice, PanasonicVieraConfig]):
-    """Panasonic Viera TV integration driver."""
 
     def __init__(self):
-        """Initialize the driver."""
         super().__init__(
             device_class=PanasonicVieraDevice,
             entity_classes=[PanasonicVieraMediaPlayer, PanasonicVieraRemote],
@@ -30,7 +30,6 @@ class PanasonicVieraDriver(BaseIntegrationDriver[PanasonicVieraDevice, Panasonic
     def create_entities(
         self, device_config: PanasonicVieraConfig, device: PanasonicVieraDevice
     ) -> list[Entity]:
-        """Create entity instances."""
         _LOG.info("Creating entities for %s", device_config.name)
 
         entities = [
@@ -40,3 +39,56 @@ class PanasonicVieraDriver(BaseIntegrationDriver[PanasonicVieraDevice, Panasonic
 
         _LOG.info("Created %d entities for %s", len(entities), device_config.name)
         return entities
+
+    def map_device_state(
+        self,
+        entity: Entity,
+        device: PanasonicVieraDevice,
+        event_data: Any = None
+    ) -> dict[str, Any]:
+        if entity.entity_type == EntityTypes.MEDIA_PLAYER:
+            if event_data:
+                return event_data
+
+            return {
+                MediaAttributes.STATE: "ON" if device.power else "OFF",
+                MediaAttributes.VOLUME: device.volume,
+                MediaAttributes.MUTED: device.muted,
+                MediaAttributes.SOURCE: device.current_source,
+                MediaAttributes.SOURCE_LIST: device.source_list,
+            }
+
+        return {}
+
+    async def refresh_entity_state(self, entity_id: str) -> None:
+        _LOG.debug("[%s] Refreshing entity state", entity_id)
+
+        device_id = self.device_from_entity_id(entity_id)
+        if not device_id:
+            _LOG.warning("[%s] Could not extract device_id", entity_id)
+            return
+
+        device = self._configured_devices.get(device_id)
+        if not device:
+            _LOG.warning("[%s] Device %s not found", entity_id, device_id)
+            return
+
+        configured_entity = self.api.configured_entities.get(entity_id)
+        if not configured_entity:
+            _LOG.debug("[%s] Entity not configured yet", entity_id)
+            return
+
+        if not device.is_connected:
+            _LOG.debug("[%s] Device not connected, marking unavailable", entity_id)
+            await super().refresh_entity_state(entity_id)
+            return
+
+        if configured_entity.entity_type == EntityTypes.MEDIA_PLAYER:
+            source_list = device.source_list
+            if not source_list:
+                source_list = await device.get_sources()
+
+            if source_list:
+                attributes = self.map_device_state(configured_entity, device)
+                self.api.configured_entities.update_attributes(entity_id, attributes)
+                _LOG.info("[%s] Updated entity state with %d sources", entity_id, len(source_list))
