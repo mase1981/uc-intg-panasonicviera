@@ -174,7 +174,7 @@ class PanasonicVieraDevice(PollingDevice):
         self.events.emit(DeviceEvents.UPDATE, remote_id, remote_attrs)
 
     def _send_wol_packet(self, mac_address: str) -> bool:
-        """Send Wake-on-LAN magic packet to TV."""
+        """Send Wake-on-LAN magic packet to TV on multiple ports."""
         try:
             # Parse MAC address (supports formats: AA:BB:CC:DD:EE:FF, AA-BB-CC-DD-EE-FF, AABBCCDDEEFF)
             mac = mac_address.replace(":", "").replace("-", "").upper()
@@ -188,13 +188,21 @@ class PanasonicVieraDevice(PollingDevice):
             # Create magic packet (6 bytes of FF followed by MAC repeated 16 times)
             magic_packet = b"\xFF" * 6 + mac_bytes * 16
 
-            # Send packet via UDP broadcast
+            # Send to multiple common WoL ports for better compatibility
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+
+            # Port 9 (most common)
             sock.sendto(magic_packet, ("<broadcast>", 9))
+            # Port 7 (also common)
+            sock.sendto(magic_packet, ("<broadcast>", 7))
+            # Direct to TV IP on port 9 (in case broadcast is blocked)
+            sock.sendto(magic_packet, (self._device_config.host, 9))
+
             sock.close()
 
-            _LOG.info("[%s] Sent WoL magic packet to %s", self.log_id, mac_address)
+            _LOG.info("[%s] Sent WoL magic packets to %s (broadcast ports 7&9, direct to %s:9)",
+                     self.log_id, mac_address, self._device_config.host)
             return True
 
         except Exception as err:
