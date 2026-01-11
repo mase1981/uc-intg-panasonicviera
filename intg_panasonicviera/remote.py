@@ -77,94 +77,96 @@ class PanasonicVieraRemote(Remote):
 
         entity_id = f"remote.{device_config.identifier}"
 
-        simple_commands = list(VIERA_KEYS.keys())
-
-        ui_pages = [
-            {
-                "page_id": "navigation",
-                "name": "Navigation",
-                "grid": {"width": 3, "height": 4},
-                "items": [
-                    {"command": {"cmd_id": "HOME"}, "location": {"x": 0, "y": 0}},
-                    {"command": {"cmd_id": "UP"}, "location": {"x": 1, "y": 0}},
-                    {"command": {"cmd_id": "MENU"}, "location": {"x": 2, "y": 0}},
-                    {"command": {"cmd_id": "LEFT"}, "location": {"x": 0, "y": 1}},
-                    {"command": {"cmd_id": "OK"}, "location": {"x": 1, "y": 1}},
-                    {"command": {"cmd_id": "RIGHT"}, "location": {"x": 2, "y": 1}},
-                    {"command": {"cmd_id": "BACK"}, "location": {"x": 0, "y": 2}},
-                    {"command": {"cmd_id": "DOWN"}, "location": {"x": 1, "y": 2}},
-                    {"command": {"cmd_id": "EXIT"}, "location": {"x": 2, "y": 2}},
-                    {"command": {"cmd_id": "INFO"}, "location": {"x": 0, "y": 3}},
-                    {"command": {"cmd_id": "GUIDE"}, "location": {"x": 1, "y": 3}},
-                    {"command": {"cmd_id": "APPS"}, "location": {"x": 2, "y": 3}},
-                ],
-            },
-            {
-                "page_id": "playback",
-                "name": "Playback",
-                "grid": {"width": 3, "height": 3},
-                "items": [
-                    {"command": {"cmd_id": "SKIP_BACK"}, "location": {"x": 0, "y": 0}},
-                    {"command": {"cmd_id": "PLAY"}, "location": {"x": 1, "y": 0}},
-                    {"command": {"cmd_id": "SKIP_FWD"}, "location": {"x": 2, "y": 0}},
-                    {"command": {"cmd_id": "REW"}, "location": {"x": 0, "y": 1}},
-                    {"command": {"cmd_id": "PAUSE"}, "location": {"x": 1, "y": 1}},
-                    {"command": {"cmd_id": "FF"}, "location": {"x": 2, "y": 1}},
-                    {"command": {"cmd_id": "REC"}, "location": {"x": 0, "y": 2}},
-                    {"command": {"cmd_id": "STOP"}, "location": {"x": 1, "y": 2}},
-                ],
-            },
-            {
-                "page_id": "channels",
-                "name": "Channels",
-                "grid": {"width": 3, "height": 4},
-                "items": [
-                    {"command": {"cmd_id": "NUM_1"}, "location": {"x": 0, "y": 0}},
-                    {"command": {"cmd_id": "NUM_2"}, "location": {"x": 1, "y": 0}},
-                    {"command": {"cmd_id": "NUM_3"}, "location": {"x": 2, "y": 0}},
-                    {"command": {"cmd_id": "NUM_4"}, "location": {"x": 0, "y": 1}},
-                    {"command": {"cmd_id": "NUM_5"}, "location": {"x": 1, "y": 1}},
-                    {"command": {"cmd_id": "NUM_6"}, "location": {"x": 2, "y": 1}},
-                    {"command": {"cmd_id": "NUM_7"}, "location": {"x": 0, "y": 2}},
-                    {"command": {"cmd_id": "NUM_8"}, "location": {"x": 1, "y": 2}},
-                    {"command": {"cmd_id": "NUM_9"}, "location": {"x": 2, "y": 2}},
-                    {"command": {"cmd_id": "CH_DOWN"}, "location": {"x": 0, "y": 3}},
-                    {"command": {"cmd_id": "NUM_0"}, "location": {"x": 1, "y": 3}},
-                    {"command": {"cmd_id": "CH_UP"}, "location": {"x": 2, "y": 3}},
-                ],
-            },
-            {
-                "page_id": "color_input",
-                "name": "Color & Input",
-                "grid": {"width": 2, "height": 4},
-                "items": [
-                    {"command": {"cmd_id": "RED"}, "location": {"x": 0, "y": 0}},
-                    {"command": {"cmd_id": "GREEN"}, "location": {"x": 1, "y": 0}},
-                    {"command": {"cmd_id": "YELLOW"}, "location": {"x": 0, "y": 1}},
-                    {"command": {"cmd_id": "BLUE"}, "location": {"x": 1, "y": 1}},
-                    {"command": {"cmd_id": "INPUT"}, "location": {"x": 0, "y": 2}},
-                    {"command": {"cmd_id": "TV"}, "location": {"x": 1, "y": 2}},
-                    {"command": {"cmd_id": "AV"}, "location": {"x": 0, "y": 3}},
-                    {"command": {"cmd_id": "NETFLIX"}, "location": {"x": 1, "y": 3}},
-                ],
-            },
-        ]
-
+        features = [Features.SEND_CMD]
         attributes = {Attributes.STATE: "UNKNOWN"}
-
-        options = {
-            Options.SIMPLE_COMMANDS: simple_commands,
-            Options.USER_INTERFACE: {"pages": ui_pages},
-        }
 
         super().__init__(
             entity_id,
             device_config.name,
-            [Features.SEND_CMD],
+            features,
             attributes,
             cmd_handler=self.handle_command,
-            options=options,
         )
+
+        simple_commands = list(VIERA_KEYS.keys())
+
+        user_interface = {
+            "pages": [
+                {
+                    "page_id": "navigation",
+                    "name": "Navigation",
+                    "grid": {"width": 3, "height": 4},
+                    "items": [
+                        {"command": {"cmd_id": "HOME"}, "location": {"x": 0, "y": 0}},
+                        {"command": {"cmd_id": "UP"}, "location": {"x": 1, "y": 0}},
+                        {"command": {"cmd_id": "MENU"}, "location": {"x": 2, "y": 0}},
+                        {"command": {"cmd_id": "LEFT"}, "location": {"x": 0, "y": 1}},
+                        {"command": {"cmd_id": "OK"}, "location": {"x": 1, "y": 1}},
+                        {"command": {"cmd_id": "RIGHT"}, "location": {"x": 2, "y": 1}},
+                        {"command": {"cmd_id": "BACK"}, "location": {"x": 0, "y": 2}},
+                        {"command": {"cmd_id": "DOWN"}, "location": {"x": 1, "y": 2}},
+                        {"command": {"cmd_id": "EXIT"}, "location": {"x": 2, "y": 2}},
+                        {"command": {"cmd_id": "INFO"}, "location": {"x": 0, "y": 3}},
+                        {"command": {"cmd_id": "GUIDE"}, "location": {"x": 1, "y": 3}},
+                        {"command": {"cmd_id": "APPS"}, "location": {"x": 2, "y": 3}},
+                    ],
+                },
+                {
+                    "page_id": "playback",
+                    "name": "Playback",
+                    "grid": {"width": 3, "height": 3},
+                    "items": [
+                        {"command": {"cmd_id": "SKIP_BACK"}, "location": {"x": 0, "y": 0}},
+                        {"command": {"cmd_id": "PLAY"}, "location": {"x": 1, "y": 0}},
+                        {"command": {"cmd_id": "SKIP_FWD"}, "location": {"x": 2, "y": 0}},
+                        {"command": {"cmd_id": "REW"}, "location": {"x": 0, "y": 1}},
+                        {"command": {"cmd_id": "PAUSE"}, "location": {"x": 1, "y": 1}},
+                        {"command": {"cmd_id": "FF"}, "location": {"x": 2, "y": 1}},
+                        {"command": {"cmd_id": "REC"}, "location": {"x": 0, "y": 2}},
+                        {"command": {"cmd_id": "STOP"}, "location": {"x": 1, "y": 2}},
+                    ],
+                },
+                {
+                    "page_id": "channels",
+                    "name": "Channels",
+                    "grid": {"width": 3, "height": 4},
+                    "items": [
+                        {"command": {"cmd_id": "NUM_1"}, "location": {"x": 0, "y": 0}},
+                        {"command": {"cmd_id": "NUM_2"}, "location": {"x": 1, "y": 0}},
+                        {"command": {"cmd_id": "NUM_3"}, "location": {"x": 2, "y": 0}},
+                        {"command": {"cmd_id": "NUM_4"}, "location": {"x": 0, "y": 1}},
+                        {"command": {"cmd_id": "NUM_5"}, "location": {"x": 1, "y": 1}},
+                        {"command": {"cmd_id": "NUM_6"}, "location": {"x": 2, "y": 1}},
+                        {"command": {"cmd_id": "NUM_7"}, "location": {"x": 0, "y": 2}},
+                        {"command": {"cmd_id": "NUM_8"}, "location": {"x": 1, "y": 2}},
+                        {"command": {"cmd_id": "NUM_9"}, "location": {"x": 2, "y": 2}},
+                        {"command": {"cmd_id": "CH_DOWN"}, "location": {"x": 0, "y": 3}},
+                        {"command": {"cmd_id": "NUM_0"}, "location": {"x": 1, "y": 3}},
+                        {"command": {"cmd_id": "CH_UP"}, "location": {"x": 2, "y": 3}},
+                    ],
+                },
+                {
+                    "page_id": "color_input",
+                    "name": "Color & Input",
+                    "grid": {"width": 2, "height": 4},
+                    "items": [
+                        {"command": {"cmd_id": "RED"}, "location": {"x": 0, "y": 0}},
+                        {"command": {"cmd_id": "GREEN"}, "location": {"x": 1, "y": 0}},
+                        {"command": {"cmd_id": "YELLOW"}, "location": {"x": 0, "y": 1}},
+                        {"command": {"cmd_id": "BLUE"}, "location": {"x": 1, "y": 1}},
+                        {"command": {"cmd_id": "INPUT"}, "location": {"x": 0, "y": 2}},
+                        {"command": {"cmd_id": "TV"}, "location": {"x": 1, "y": 2}},
+                        {"command": {"cmd_id": "AV"}, "location": {"x": 0, "y": 3}},
+                        {"command": {"cmd_id": "NETFLIX"}, "location": {"x": 1, "y": 3}},
+                    ],
+                },
+            ]
+        }
+
+        self.options = {
+            Options.SIMPLE_COMMANDS: simple_commands,
+            "user_interface": user_interface,
+        }
 
         _LOG.info("[%s] Remote entity initialized with %d commands", self.id, len(simple_commands))
 
