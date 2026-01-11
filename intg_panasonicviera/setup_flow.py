@@ -44,6 +44,11 @@ class PanasonicVieraSetupFlow(BaseSetupFlow[PanasonicVieraConfig]):
                     "label": {"en": "Port"},
                     "field": {"text": {"value": "55000"}},
                 },
+                {
+                    "id": "mac_address",
+                    "label": {"en": "MAC Address (optional, for Wake on LAN)"},
+                    "field": {"text": {"value": ""}},
+                },
             ],
         )
 
@@ -61,6 +66,7 @@ class PanasonicVieraSetupFlow(BaseSetupFlow[PanasonicVieraConfig]):
         port = int(input_values.get("port", 55000))
         name = input_values.get("name", f"Panasonic Viera ({host})").strip()
         pin = input_values.get("pin", "").strip()
+        mac_address = input_values.get("mac_address", "").strip() or None
 
         _LOG.info("Setting up Panasonic Viera TV at %s:%s", host, port)
 
@@ -113,6 +119,11 @@ class PanasonicVieraSetupFlow(BaseSetupFlow[PanasonicVieraConfig]):
                                     "id": "name",
                                     "label": {"en": "TV Name"},
                                     "field": {"text": {"value": name}},
+                                },
+                                {
+                                    "id": "mac_address",
+                                    "label": {"en": "MAC Address (optional)"},
+                                    "field": {"text": {"value": mac_address or ""}},
                                 },
                                 {
                                     "id": "pin",
@@ -174,6 +185,7 @@ class PanasonicVieraSetupFlow(BaseSetupFlow[PanasonicVieraConfig]):
                 port=port,
                 app_id=app_id,
                 encryption_key=encryption_key,
+                mac_address=mac_address,
             )
 
             _LOG.info("Setup completed successfully for %s", name)
