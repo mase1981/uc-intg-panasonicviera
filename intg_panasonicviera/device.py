@@ -9,17 +9,17 @@ import asyncio
 import logging
 from typing import Any
 from panasonic_viera import RemoteControl
-from ucapi_framework import ExternalClientDevice, DeviceEvents
+from ucapi_framework import PollingDevice, DeviceEvents
 from ucapi.media_player import Attributes as MediaAttributes
 from intg_panasonicviera.config import PanasonicVieraConfig
 
 _LOG = logging.getLogger(__name__)
 
 
-class PanasonicVieraDevice(ExternalClientDevice):
+class PanasonicVieraDevice(PollingDevice):
 
     def __init__(self, device_config: PanasonicVieraConfig, **kwargs):
-        super().__init__(device_config, **kwargs)
+        super().__init__(device_config, poll_interval=30, **kwargs)
         self._device_config = device_config
         self._remote: RemoteControl | None = None
         self._power_state: bool = False
@@ -105,11 +105,7 @@ class PanasonicVieraDevice(ExternalClientDevice):
             self._emit_update()
             raise
 
-    async def close_connection(self) -> None:
-        _LOG.debug("[%s] Closing connection", self.log_id)
-        self._remote = None
-
-    async def poll_device_state(self) -> None:
+    async def poll_device(self) -> None:
         if not self._remote:
             _LOG.debug("[%s] No remote connection, skipping poll", self.log_id)
             return
