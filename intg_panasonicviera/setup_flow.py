@@ -19,6 +19,11 @@ _LOG = logging.getLogger(__name__)
 class PanasonicVieraSetupFlow(BaseSetupFlow[PanasonicVieraConfig]):
     """Setup flow for Panasonic Viera TV integration with PIN pairing support."""
 
+    def __init__(self):
+        """Initialize setup flow."""
+        super().__init__()
+        self._remote_instance: RemoteControl | None = None
+
     def get_manual_entry_form(self) -> RequestUserInput:
         """Define manual entry fields."""
         return RequestUserInput(
@@ -60,8 +65,12 @@ class PanasonicVieraSetupFlow(BaseSetupFlow[PanasonicVieraConfig]):
         _LOG.info("Setting up Panasonic Viera TV at %s:%s", host, port)
 
         try:
-            # Create RemoteControl instance
-            remote = await asyncio.to_thread(RemoteControl, host, port)
+            # Reuse RemoteControl instance if available (for PIN flow)
+            # This is critical - authorize_pin_code needs the same instance that called request_pin_code
+            if self._remote_instance is None:
+                self._remote_instance = await asyncio.to_thread(RemoteControl, host, port)
+
+            remote = self._remote_instance
 
             # Check if TV requires encryption (has app_id and enc_key)
             app_id = None
@@ -171,9 +180,14 @@ class PanasonicVieraSetupFlow(BaseSetupFlow[PanasonicVieraConfig]):
             )
 
             _LOG.info("Setup completed successfully for %s", name)
+
+            # Clear the instance for next setup
+            self._remote_instance = None
+
             return config
 
         except asyncio.TimeoutError:
+            self._remote_instance = None
             raise ValueError(
                 f"Connection timeout to {host}:{port}\n"
                 "Please verify TV is powered on and accessible"
@@ -181,7 +195,9 @@ class PanasonicVieraSetupFlow(BaseSetupFlow[PanasonicVieraConfig]):
 
         except ValueError:
             # Re-raise ValueError as-is (already has good error message)
+            self._remote_instance = None
             raise
 
         except Exception as err:
+            self._remote_instance = None
             raise ValueError(f"Setup failed: {err}") from err
