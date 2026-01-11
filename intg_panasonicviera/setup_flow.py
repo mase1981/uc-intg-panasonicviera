@@ -154,15 +154,12 @@ class PanasonicVieraSetupFlow(BaseSetupFlow[PanasonicVieraConfig]):
             # Create identifier
             identifier = f"viera_{host.replace('.', '_')}_{port}"
 
-            # Test connection with credentials (if encrypted)
+            # Verify credentials work (if encrypted)
+            # Note: We use the existing 'remote' instance which already has the credentials
+            # after authorize_pin_code() was called
             if app_id and encryption_key:
-                test_remote = await asyncio.to_thread(RemoteControl, host, port)
-                test_remote.app_id = app_id
-                test_remote.enc_key = encryption_key
-
-                # Verify credentials work
                 try:
-                    await asyncio.to_thread(test_remote.get_volume)
+                    await asyncio.to_thread(remote.get_volume)
                     _LOG.info("Verified encrypted connection works")
                 except Exception as test_err:
                     raise ValueError(
