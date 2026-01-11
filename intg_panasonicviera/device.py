@@ -78,18 +78,23 @@ class PanasonicVieraDevice(PollingDevice):
         """Establish connection to TV."""
         _LOG.debug("[%s] Establishing connection", self.log_id)
         try:
-            # Create RemoteControl instance
-            self._remote = await asyncio.to_thread(
-                RemoteControl,
-                self._device_config.host,
-                self._device_config.port,
-            )
-
-            # If encrypted TV, set app_id and encryption_key
+            # Create RemoteControl instance with encryption credentials if available
             if self._device_config.app_id and self._device_config.encryption_key:
                 _LOG.debug("[%s] Using encrypted connection", self.log_id)
-                self._remote.app_id = self._device_config.app_id
-                self._remote.enc_key = self._device_config.encryption_key
+                self._remote = await asyncio.to_thread(
+                    RemoteControl,
+                    self._device_config.host,
+                    self._device_config.port,
+                    self._device_config.app_id,
+                    self._device_config.encryption_key,
+                )
+            else:
+                _LOG.debug("[%s] Using non-encrypted connection", self.log_id)
+                self._remote = await asyncio.to_thread(
+                    RemoteControl,
+                    self._device_config.host,
+                    self._device_config.port,
+                )
 
             return self._remote
 
