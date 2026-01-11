@@ -51,11 +51,14 @@ class PanasonicVieraMediaPlayer(MediaPlayer):
                 Features.PREVIOUS,
                 Features.FAST_FORWARD,
                 Features.REWIND,
+                Features.SELECT_SOURCE,
             ],
             {
                 Attributes.STATE: States.UNAVAILABLE,
                 Attributes.VOLUME: 0,
                 Attributes.MUTED: False,
+                Attributes.SOURCE: "",
+                Attributes.SOURCE_LIST: [],
             },
             device_class=DeviceClasses.TV,
             cmd_handler=self.handle_command,
@@ -126,6 +129,12 @@ class PanasonicVieraMediaPlayer(MediaPlayer):
             elif cmd_id == Commands.REWIND:
                 success = await self._device.send_key("NRC_REW-ONOFF")
                 return StatusCodes.OK if success else StatusCodes.SERVER_ERROR
+
+            elif cmd_id == Commands.SELECT_SOURCE:
+                if params and "source" in params:
+                    success = await self._device.select_source(params["source"])
+                    return StatusCodes.OK if success else StatusCodes.SERVER_ERROR
+                return StatusCodes.BAD_REQUEST
 
             elif cmd_id == Commands.PLAY_MEDIA:
                 if params and "media_type" in params and "media_id" in params:
