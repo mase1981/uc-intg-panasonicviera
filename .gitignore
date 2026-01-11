@@ -91,3 +91,7 @@ artifacts/
 # AI Tools
 Claude/
 .claude/
+
+# Tests
+run_tests.py
+tests/

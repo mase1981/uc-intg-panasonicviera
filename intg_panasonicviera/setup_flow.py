@@ -19,10 +19,10 @@ _LOG = logging.getLogger(__name__)
 class PanasonicVieraSetupFlow(BaseSetupFlow[PanasonicVieraConfig]):
     """Setup flow for Panasonic Viera TV integration with PIN pairing support."""
 
-    def __init__(self, driver, **kwargs):
-        """Initialize setup flow."""
-        super().__init__(driver, **kwargs)
-        self._remote_instance: RemoteControl | None = None
+    # Instance variable to persist RemoteControl between setup steps
+    # This is critical for PIN authorization - authorize_pin_code() needs the same
+    # instance that called request_pin_code()
+    _remote_instance: RemoteControl | None = None
 
     def get_manual_entry_form(self) -> RequestUserInput:
         """Define manual entry fields."""
