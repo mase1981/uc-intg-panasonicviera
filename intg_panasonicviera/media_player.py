@@ -17,8 +17,8 @@ from ucapi.media_player import (
     States,
     MediaType,
 )
-from .config import PanasonicVieraConfig
-from .device import PanasonicVieraDevice
+from intg_panasonicviera.config import PanasonicVieraConfig
+from intg_panasonicviera.device import PanasonicVieraDevice
 
 _LOG = logging.getLogger(__name__)
 

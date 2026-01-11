@@ -8,10 +8,10 @@ Panasonic Viera TV driver for Unfolded Circle Remote.
 import logging
 from ucapi import Entity
 from ucapi_framework import BaseIntegrationDriver
-from .config import PanasonicVieraConfig
-from .device import PanasonicVieraDevice
-from .media_player import PanasonicVieraMediaPlayer
-from .remote import PanasonicVieraRemote
+from intg_panasonicviera.config import PanasonicVieraConfig
+from intg_panasonicviera.device import PanasonicVieraDevice
+from intg_panasonicviera.media_player import PanasonicVieraMediaPlayer
+from intg_panasonicviera.remote import PanasonicVieraRemote
 
 _LOG = logging.getLogger(__name__)
 

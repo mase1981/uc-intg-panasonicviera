@@ -9,8 +9,8 @@ import logging
 from typing import Any
 from ucapi import StatusCodes
 from ucapi.remote import Attributes, Commands, Features, Remote
-from .config import PanasonicVieraConfig
-from .device import PanasonicVieraDevice
+from intg_panasonicviera.config import PanasonicVieraConfig
+from intg_panasonicviera.device import PanasonicVieraDevice
 
 _LOG = logging.getLogger(__name__)
 
