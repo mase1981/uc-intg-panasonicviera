@@ -25,15 +25,19 @@ class PanasonicVieraDriver(BaseIntegrationDriver[PanasonicVieraDevice, Panasonic
             entity_classes=[PanasonicVieraMediaPlayer, PanasonicVieraRemote],
             driver_id="panasonicviera",
         )
+        self._remote_entities: dict[str, PanasonicVieraRemote] = {}
 
     def create_entities(
         self, device_config: PanasonicVieraConfig, device: PanasonicVieraDevice
     ) -> list[Entity]:
         _LOG.info("Creating entities for %s", device_config.name)
 
+        remote = PanasonicVieraRemote(device_config, device)
+        self._remote_entities[device_config.identifier] = remote
+
         entities = [
             PanasonicVieraMediaPlayer(device_config, device),
-            PanasonicVieraRemote(device_config, device),
+            remote,
         ]
 
         _LOG.info("Created %d entities for %s", len(entities), device_config.name)
@@ -72,3 +76,22 @@ class PanasonicVieraDriver(BaseIntegrationDriver[PanasonicVieraDevice, Panasonic
                     entity_id, {MediaAttributes.SOURCE_LIST: source_list}
                 )
                 _LOG.info("[%s] Updated entity state with %d sources", entity_id, len(source_list))
+
+            # Also update remote with discovered apps
+            await self._update_remote_apps(device_id, device)
+
+        elif configured_entity.entity_type == EntityTypes.REMOTE:
+            # Update remote with discovered apps when remote entity is refreshed
+            await self._update_remote_apps(device_id, device)
+
+    async def _update_remote_apps(self, device_id: str, device: PanasonicVieraDevice) -> None:
+        """Update the remote entity with discovered apps from the TV."""
+        remote = self._remote_entities.get(device_id)
+        if not remote:
+            return
+
+        if device.power:
+            apps = await device.get_apps_list()
+            if apps:
+                await remote.update_discovered_apps(apps)
+                _LOG.debug("[%s] Updated remote with %d discovered apps", device_id, len(apps))
