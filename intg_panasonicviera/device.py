@@ -351,3 +351,29 @@ class PanasonicVieraDevice(PollingDevice):
         except Exception as err:
             _LOG.error("[%s] Select source failed: %s", self.log_id, err)
             return False
+
+    async def launch_app(self, app: Any) -> bool:
+        """Launch a specific app on the TV."""
+        _LOG.info("[%s] Launching app: %s", self.log_id, app.name)
+        try:
+            remote = await self._create_remote_control()
+            await asyncio.to_thread(remote.launch_app, app)
+            self._current_source = app.name
+            self._emit_update()
+            return True
+        except Exception as err:
+            _LOG.error("[%s] Launch app failed: %s", self.log_id, err)
+            return False
+
+    async def get_apps_list(self) -> list[Any]:
+        """Get the raw list of app objects from the TV."""
+        if not self._power_state:
+            return []
+
+        try:
+            remote = await self._create_remote_control()
+            apps = await asyncio.to_thread(remote.get_apps)
+            return apps if apps else []
+        except Exception as err:
+            _LOG.debug("[%s] Get apps list failed: %s", self.log_id, err)
+            return []
