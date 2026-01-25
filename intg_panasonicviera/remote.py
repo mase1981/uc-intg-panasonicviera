@@ -320,16 +320,19 @@ class PanasonicVieraRemote(Remote):
 
     async def update_discovered_apps(self, apps: list[Any]) -> None:
         """Update the remote with newly discovered apps from the TV."""
-        if apps == self._discovered_apps:
+        # Ensure apps is always a list (handle generators, iterators, etc.)
+        apps_list = list(apps) if apps else []
+
+        if apps_list == self._discovered_apps:
             return
 
-        self._discovered_apps = apps
+        self._discovered_apps = apps_list
         self._update_options()
         _LOG.info(
             "[%s] Updated remote with %d discovered apps: %s",
             self.id,
-            len(apps),
-            [app.name if hasattr(app, 'name') else str(app) for app in apps[:10]],  # Log first 10
+            len(apps_list),
+            [app.name if hasattr(app, 'name') else str(app) for app in apps_list[:10]],  # Log first 10
         )
 
     async def handle_command(
