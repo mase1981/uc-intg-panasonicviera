@@ -51,7 +51,7 @@ class PanasonicVieraDriver(BaseIntegrationDriver[PanasonicVieraDevice, Panasonic
             _LOG.warning("[%s] Could not extract device_id", entity_id)
             return
 
-        device = self._configured_devices.get(device_id)
+        device = self.devices.get(device_id)
         if not device:
             _LOG.warning("[%s] Device %s not found", entity_id, device_id)
             return
