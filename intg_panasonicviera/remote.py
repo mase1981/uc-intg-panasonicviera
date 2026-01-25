@@ -262,8 +262,10 @@ class PanasonicVieraRemote(Remote):
             y = i // grid_width
             # Create command ID from app name (sanitized)
             cmd_id = self._get_app_command_id(app)
+            # Handle both app objects with .name attribute and string app names
+            app_name = app.name if hasattr(app, 'name') else str(app)
             # Truncate app name for display (max ~10 chars to fit in button)
-            display_name = app.name[:10] if len(app.name) > 10 else app.name
+            display_name = app_name[:10] if len(app_name) > 10 else app_name
             items.append({
                 "type": "text",
                 "text": display_name,
@@ -282,8 +284,10 @@ class PanasonicVieraRemote(Remote):
 
     def _get_app_command_id(self, app: Any) -> str:
         """Generate a safe command ID for an app."""
+        # Handle both app objects with .name attribute and string app names
+        app_name = app.name if hasattr(app, 'name') else str(app)
         # Sanitize app name: remove spaces/special chars, uppercase, limit to 15 chars
-        safe_name = "".join(c for c in app.name if c.isalnum()).upper()[:15]
+        safe_name = "".join(c for c in app_name if c.isalnum()).upper()[:15]
         return f"{APP_CMD_PREFIX}{safe_name}"
 
     def _update_options(self) -> None:
@@ -325,7 +329,7 @@ class PanasonicVieraRemote(Remote):
             "[%s] Updated remote with %d discovered apps: %s",
             self.id,
             len(apps),
-            [app.name for app in apps[:10]],  # Log first 10
+            [app.name if hasattr(app, 'name') else str(app) for app in apps[:10]],  # Log first 10
         )
 
     async def handle_command(
@@ -357,7 +361,8 @@ class PanasonicVieraRemote(Remote):
         # Check if it's a discovered app command
         if cmd_id.startswith(APP_CMD_PREFIX) and cmd_id in self._app_commands:
             app = self._app_commands[cmd_id]
-            _LOG.info("[%s] Launching app: %s", self.id, app.name)
+            app_name = app.name if hasattr(app, 'name') else str(app)
+            _LOG.info("[%s] Launching app: %s", self.id, app_name)
             success = await self._device.launch_app(app)
             return StatusCodes.OK if success else StatusCodes.SERVER_ERROR
 

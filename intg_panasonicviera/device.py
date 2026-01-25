@@ -320,7 +320,7 @@ class PanasonicVieraDevice(PollingDevice):
             remote = await self._create_remote_control()
             apps = await asyncio.to_thread(remote.get_apps)
             if apps:
-                self._source_list = [app.name for app in apps]
+                self._source_list = [app.name if hasattr(app, 'name') else str(app) for app in apps]
                 _LOG.debug("[%s] Found %d sources", self.log_id, len(self._source_list))
                 self._emit_update()
             return self._source_list
@@ -338,7 +338,8 @@ class PanasonicVieraDevice(PollingDevice):
                 return False
 
             for app in apps:
-                if app.name == source:
+                app_name = app.name if hasattr(app, 'name') else str(app)
+                if app_name == source:
                     await asyncio.to_thread(remote.launch_app, app)
                     self._current_source = source
                     self._emit_update()
@@ -354,11 +355,12 @@ class PanasonicVieraDevice(PollingDevice):
 
     async def launch_app(self, app: Any) -> bool:
         """Launch a specific app on the TV."""
-        _LOG.info("[%s] Launching app: %s", self.log_id, app.name)
+        app_name = app.name if hasattr(app, 'name') else str(app)
+        _LOG.info("[%s] Launching app: %s", self.log_id, app_name)
         try:
             remote = await self._create_remote_control()
             await asyncio.to_thread(remote.launch_app, app)
-            self._current_source = app.name
+            self._current_source = app_name
             self._emit_update()
             return True
         except Exception as err:
