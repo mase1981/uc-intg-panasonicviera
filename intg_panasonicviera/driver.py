@@ -35,6 +35,13 @@ class PanasonicVieraDriver(BaseIntegrationDriver[PanasonicVieraDevice, Panasonic
         remote = PanasonicVieraRemote(device_config, device)
         self._remote_entities[device_config.identifier] = remote
 
+        # Set up callback for app discovery updates
+        async def on_apps_discovered(apps):
+            await remote.update_discovered_apps(apps)
+            _LOG.debug("[%s] Updated remote with %d discovered apps", device_config.identifier, len(apps))
+
+        device._apps_update_callback = on_apps_discovered
+
         entities = [
             PanasonicVieraMediaPlayer(device_config, device),
             remote,
@@ -42,56 +49,3 @@ class PanasonicVieraDriver(BaseIntegrationDriver[PanasonicVieraDevice, Panasonic
 
         _LOG.info("Created %d entities for %s", len(entities), device_config.name)
         return entities
-
-    async def refresh_entity_state(self, entity_id: str) -> None:
-        _LOG.debug("[%s] Refreshing entity state", entity_id)
-
-        device_id = self.device_from_entity_id(entity_id)
-        if not device_id:
-            _LOG.warning("[%s] Could not extract device_id", entity_id)
-            return
-
-        device = self.devices.get(device_id)
-        if not device:
-            _LOG.warning("[%s] Device %s not found", entity_id, device_id)
-            return
-
-        configured_entity = self.api.configured_entities.get(entity_id)
-        if not configured_entity:
-            _LOG.debug("[%s] Entity not configured yet", entity_id)
-            return
-
-        if not device.is_connected:
-            _LOG.debug("[%s] Device not connected, marking unavailable", entity_id)
-            await super().refresh_entity_state(entity_id)
-            return
-
-        if configured_entity.entity_type == EntityTypes.MEDIA_PLAYER:
-            source_list = device.source_list
-            if not source_list:
-                source_list = await device.get_sources()
-
-            if source_list:
-                self.api.configured_entities.update_attributes(
-                    entity_id, {MediaAttributes.SOURCE_LIST: source_list}
-                )
-                _LOG.info("[%s] Updated entity state with %d sources", entity_id, len(source_list))
-
-            # Also update remote with discovered apps
-            await self._update_remote_apps(device_id, device)
-
-        elif configured_entity.entity_type == EntityTypes.REMOTE:
-            # Update remote with discovered apps when remote entity is refreshed
-            await self._update_remote_apps(device_id, device)
-
-    async def _update_remote_apps(self, device_id: str, device: PanasonicVieraDevice) -> None:
-        """Update the remote entity with discovered apps from the TV."""
-        remote = self._remote_entities.get(device_id)
-        if not remote:
-            return
-
-        if device.power:
-            apps = await device.get_apps_list()
-            if apps:
-                await remote.update_discovered_apps(apps)
-                _LOG.debug("[%s] Updated remote with %d discovered apps", device_id, len(apps))

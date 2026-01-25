@@ -29,6 +29,8 @@ class PanasonicVieraDevice(PollingDevice):
         self._muted: bool = False
         self._current_source: str = ""
         self._source_list: list[str] = []
+        self._apps_list: list[Any] = []
+        self._apps_update_callback = None
 
     @property
     def identifier(self) -> str:
@@ -322,9 +324,17 @@ class PanasonicVieraDevice(PollingDevice):
             if apps:
                 # Ensure apps is a list (handle generators, iterators, etc.)
                 apps_list = list(apps) if apps else []
+                self._apps_list = apps_list
                 self._source_list = [app.name if hasattr(app, 'name') else str(app) for app in apps_list]
                 _LOG.debug("[%s] Found %d sources", self.log_id, len(self._source_list))
                 self._emit_update()
+
+                # Notify about app updates for remote entity
+                if self._apps_update_callback and apps_list:
+                    try:
+                        await self._apps_update_callback(apps_list)
+                    except Exception as cb_err:
+                        _LOG.debug("[%s] Apps update callback error: %s", self.log_id, cb_err)
             return self._source_list
         except Exception as err:
             _LOG.debug("[%s] Get sources failed: %s", self.log_id, err)
