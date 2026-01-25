@@ -320,7 +320,9 @@ class PanasonicVieraDevice(PollingDevice):
             remote = await self._create_remote_control()
             apps = await asyncio.to_thread(remote.get_apps)
             if apps:
-                self._source_list = [app.name if hasattr(app, 'name') else str(app) for app in apps]
+                # Ensure apps is a list (handle generators, iterators, etc.)
+                apps_list = list(apps) if apps else []
+                self._source_list = [app.name if hasattr(app, 'name') else str(app) for app in apps_list]
                 _LOG.debug("[%s] Found %d sources", self.log_id, len(self._source_list))
                 self._emit_update()
             return self._source_list
@@ -337,7 +339,9 @@ class PanasonicVieraDevice(PollingDevice):
                 _LOG.warning("[%s] No apps available", self.log_id)
                 return False
 
-            for app in apps:
+            # Ensure apps is a list (handle generators, iterators, etc.)
+            apps_list = list(apps)
+            for app in apps_list:
                 app_name = app.name if hasattr(app, 'name') else str(app)
                 if app_name == source:
                     await asyncio.to_thread(remote.launch_app, app)
@@ -375,7 +379,8 @@ class PanasonicVieraDevice(PollingDevice):
         try:
             remote = await self._create_remote_control()
             apps = await asyncio.to_thread(remote.get_apps)
-            return apps if apps else []
+            # Ensure apps is a list (handle generators, iterators, etc.)
+            return list(apps) if apps else []
         except Exception as err:
             _LOG.debug("[%s] Get apps list failed: %s", self.log_id, err)
             return []
