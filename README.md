@@ -58,35 +58,42 @@ Your support helps maintain this integration. Thank you! ❤️
 
 ### 🎮 **Advanced Remote Control**
 
-#### **Navigation Page** (3x4 Grid)
+#### **Navigation Page** (4x6 Grid)
 Control your TV with intuitive navigation:
+- **Power Toggle** - Power your TV on and off
 - **Home Button** - Quick access to TV home screen
-- **D-Pad** - Up, Down, Left, Right navigation
-- **OK Button** - Select/Enter
+- **TV/AV** - Direct switching between antenna(s) and selected AV source
+- **D-Pad** - Up, Down, Left, Right and Select
 - **Back/Exit** - Navigation controls
 - **Menu** - Access TV settings
-- **Info/Guide** - Program information
-- **Apps** - Quick access to apps
+- **Guide/Info** - Show TV Guide/Information banner
+- **Netflix/Apps** - Quick access to Netflix and other apps
+- **Color Buttons** - Red, Green, Yellow, Blue for interactive features
 
-#### **Playback Page** (3x3 Grid)
+#### **Channels Page** (4x5 Grid)
+Channel and number control:
+- **Number Pad** - Direct channel entry (0-9)
+- **Channel Up/Down** - Channel navigation
+- **Last View** - Quick channel switching
+- **eHelp** - Viera on-screen help/tutorials
+
+#### **Transport and Input Page** (4x5 Grid)
 Complete playback control:
 - **Play/Pause/Stop** - Playback control
 - **Skip Back/Forward** - Chapter navigation
 - **Rewind/Fast Forward** - Seek controls
 - **Record** - Recording control (if supported)
+- **HDMI Selection** - Direct switching to individual HDMI ports
+- **My App** - Go straight to (or set up) your chosen app
+- **Other Features** - Aspect Ratio, also Subtitles & Teletext if broadcast
 
-#### **Channels Page** (3x4 Grid)
-Channel and number control:
-- **Number Pad** - Direct channel entry (0-9)
+#### **UC Remote Two/3 Physical Buttons**
+Fully mapped to Viera commands, including:
+- **Volume** - Volume Up/Down and Mute Toggle
+- **D-Pad** - Navigation Up/Down/Left/Right and Select
 - **Channel Up/Down** - Channel navigation
-- **Previous Channel** - Quick channel switching
-
-#### **Color & Input Page** (2x4 Grid)
-Advanced TV features:
-- **Color Buttons** - Red, Green, Yellow, Blue for interactive features
-- **Input Selection** - Switch between inputs
-- **TV/AV** - Input mode switching
-- **Netflix** - Quick access to Netflix app
+- **Transport Control** - Play, Stop, Skip Forward and Skip Backward
+- **Note** - Physical power button is reserved for UC functions
 
 ### 🔐 **Encrypted TV Support**
 
@@ -233,22 +240,36 @@ Each Panasonic Viera TV's media player entity provides complete control:
 
 ### Remote Control Entity
 
-Complete TV remote control organized into 4 pages:
+Complete TV remote control - 3 UI pages & physical buttons:
 
 #### **Page 1: Navigation**
 | Button | Function |
 |--------|----------|
-| Home | TV Home screen |
-| Up/Down/Left/Right | D-Pad navigation |
-| OK | Select/Enter |
-| Back | Back button |
-| Exit | Exit menu |
+| Power | Toggle power on/off |
+| Home | TV home screen |
+| TV & AV | Switch between antenna(s)/AV inputs |
 | Menu | TV settings menu |
-| Info | Program info |
-| Guide | TV guide |
+| Guide | Show TV Guide |
+| Netflix | Switch to Netflix app |
 | Apps | Apps menu |
+| Up/Down/Left/Right | D-Pad navigation |
+| OK | Select |
+| Info | Show Information Banner |
+| Option | Pin to HOME/Accessibility/AV options |
+| Exit | Exit menu |
+| Back/Return | Go back |
+| Color Buttons | Red, Green, Yellow, Blue |
 
-#### **Page 2: Playback**
+#### **Page 2: Channels**
+| Button | Function |
+|--------|----------|
+| 0-9 | Number pad for direct channel entry |
+| Channel Up | Next channel |
+| Channel Down | Previous channel |
+| Last View | Previously viewed channel |
+| eHelp | Viera on-screen help/tutorials |
+
+#### **Page 3: Transport and Input**
 | Button | Function |
 |--------|----------|
 | Play | Play content |
@@ -259,22 +280,27 @@ Complete TV remote control organized into 4 pages:
 | Rewind | Seek backward |
 | Fast Forward | Seek forward |
 | Record | Record (if supported) |
+| My Apps | Access your chosen app |
+| Aspect | Change picture aspect ratio |
+| Text | Select teletext (if broadcast) |
+| STTL | Switch subtitles on/off |
+| HDMI | Directly select HDMI inputs |
 
-#### **Page 3: Channels**
+#### **UC Remote Physical Buttons**
 | Button | Function |
 |--------|----------|
-| 0-9 | Number pad for direct channel entry |
-| CH Up | Next channel |
-| CH Down | Previous channel |
-
-#### **Page 4: Color & Input**
-| Button | Function |
-|--------|----------|
-| Red/Green/Yellow/Blue | Interactive features |
-| Input | Input selection |
-| TV | Switch to TV mode |
-| AV | Switch to AV mode |
-| Netflix | Launch Netflix app |
+| Back/Return | Go back |
+| Home | TV home screen |
+| D-Pad | Navigation and Select |
+| Volume Up/Down | Volume up and down |
+| Mute | Toggle mute on/off |
+| Channel Up/Down | Channel up and down |
+| Menu | TV settings menu |
+| Record | Record (if supported) |
+| Skip Back | Previous chapter |
+| Stop | Stop playback |
+| Play/Pause | Play |
+| Skip Forward | Next chapter |
 
 ## Credits
 
